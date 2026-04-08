@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MineProductions - API Test</title>
+    <style>
+        body {
+            background: #080808;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-box {
+            background: #111;
+            border: 1px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .success { background: #4CAF50; color: #000; }
+        .error { background: #f44336; color: #fff; }
+        .warning { background: #ff9800; color: #000; }
+        button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .code { color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>🔍 MineProductions - API Test Page</h1>
+    <p>Yeh page check karega ki aapki website properly kaam kar rahi hai ya nahi.</p>
+
+    <div class="test-box">
+        <h2>Test 1: Shop API Check</h2>
+        <p>Yeh test check karega ki shop items fetch ho rahe hain ya nahi.</p>
+        <button onclick="testShopAPI()">Test Shop API</button>
+        <div id="shopResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 2: Admin API Check</h2>
+        <p>Yeh test check karega ki admin API kaam kar raha hai ya nahi.</p>
+        <input type="password" id="adminPass" placeholder="Admin Password" style="padding: 10px; background: #000; color: #fff; border: 1px solid #4CAF50; border-radius: 5px;">
+        <button onclick="testAdminAPI()">Test Admin API</button>
+        <div id="adminResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 3: Data Folder Check</h2>
+        <p>Yeh test check karega ki data folder properly configured hai ya nahi.</p>
+        <button onclick="testDataFolder()">Test Data Folder</button>
+        <div id="dataResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>📝 Instructions</h2>
+        <ol>
+            <li>Sabse pehle <strong>"Test Shop API"</strong> button click karo</li>
+            <li>Agar <span class="success">✅ SUCCESS</span> dikhe, matlab API kaam kar raha hai!</li>
+            <li>Agar <span class="error">❌ ERROR</span> dikhe:
+                <ul>
+                    <li>Check karo <code>/data</code> folder exist karta hai ya nahi</li>
+                    <li>Check karo <code>shop-items.json</code> file hai ya nahi</li>
+                    <li>Folder permissions <strong>777</strong> hona chahiye</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <script>
+        async function testShopAPI() {
+            const resultDiv = document.getElementById('shopResult');
+            resultDiv.innerHTML = '<p>Testing... ⏳</p>';
+            
+            try {
+                const response = await fetch('/api/shop');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">✅ SUCCESS - API Working!</div>
+                        <p>Shop items found: <strong>${data.length}</strong></p>
+                        <pre class="code">${JSON.stringify(data, null, 2)}</pre>
+                        <p>✅ Matlab: Admin panel se add kiye gaye items sabko dikhenge!</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="status error">❌ ERROR - API Failed!</div>
+                        <p>Error: ${data.error || 'Unknown error'}</p>
+                        <p><strong>Fix:</strong> Data folder aur permissions check karo</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">❌ ERROR - Cannot connect to API!</div>
+                    <p>Error: ${error.message}</p>
+                    <p><strong>Possible reasons:</strong></p>
+                    <ul>
+                        <li>Server running nahi hai</li>
+                        <li>API route file missing hai</li>
+                        <li>Build properly nahi hui</li>
+                    </ul>
+                `;
+            }
+        }
+
+        async function testAdminAPI() {
+            const resultDiv = document.getElementById('adminResult');
+            const password = document.getElementById('adminPass').value;
+            
+            if (!password) {
+                resultDiv.innerHTML = '<div class="status warning">⚠️ Please enter admin password</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Testing... ⏳</p>';
+            
+            try {
+                const response = await fetch('/api/admin/data?type=shop', {
+                    headers: {
+                        'x-admin-password': password
+                    }
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">✅ SUCCESS - Admin API Working!</div>
+                        <p>Shop items in database: <strong>${data.length}</strong></p>
+                        <pre class="code">${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else if (response.status === 401) {
+                    resultDiv.innerHTML = `
+                        <div class="status error">❌ Wrong Password!</div>
+                        <p>Default password: <code>Mine@buster@2012</code></p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="status error">❌ ERROR!</div>
+                        <p>Error: ${data.error || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">❌ ERROR!</div>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testDataFolder() {
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.innerHTML = '<p>Testing... ⏳</p>';
+            
+            try {
+                const shopResponse = await fetch('/api/shop');
+                const shopData = await shopResponse.json();
+                
+                let html = '<div class="status success">✅ Data folder is accessible!</div>';
+                html += '<h3>Current Status:</h3>';
+                html += `<p>📦 Shop Items: <strong>${Array.isArray(shopData) ? shopData.length : 'Error'}</strong></p>`;
+                
+                if (Array.isArray(shopData) && shopData.length === 0) {
+                    html += `
+                        <div class="status warning">⚠️ No items in shop yet</div>
+                        <p>Admin panel se items add karo, yaha immediately dikhengi!</p>
+                    `;
+                } else if (Array.isArray(shopData)) {
+                    html += `
+                        <div class="status success">✅ Items found! Everything working perfectly!</div>
+                    `;
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">❌ Data folder issue!</div>
+                    <p>Error: ${error.message}</p>
+                    <h3>Fix Steps:</h3>
+                    <ol>
+                        <li>Create <code>/data</code> folder in root directory</li>
+                        <li>Set permissions to <strong>777</strong></li>
+                        <li>Create <code>shop-items.json</code> with content: <code>[]</code></li>
+                        <li>Create <code>orders.json</code> with content: <code>[]</code></li>
+                    </ol>
+                `;
+            }
+        }
+
+        // Auto-run shop API test on page load
+        window.onload = function() {
+            testShopAPI();
+        };
+    </script>
+</body>
+</html>

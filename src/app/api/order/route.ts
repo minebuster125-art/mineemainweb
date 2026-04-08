@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 const rateLimitMap = new Map<string, { count: number; timestamp: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -72,29 +74,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to dispatch order" }, { status: 500 });
     }
 
-    // MySQL me save
+    // Save to JSON file
     try {
-      const { initDB } = await import("@/lib/db");
-      const pool = (await import("@/lib/db")).default;
-      await initDB();
+      const ORDERS_FILE = path.join(process.cwd(), "data", "orders.json");
+      const dir = path.dirname(ORDERS_FILE);
+      
+      // Ensure directory exists
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      if (!fs.existsSync(ORDERS_FILE)) {
+        fs.writeFileSync(ORDERS_FILE, JSON.stringify([]), "utf-8");
+      }
 
       const orderData = parsedPayload.embeds?.[0]?.fields || [];
       const getValue = (name: string) => orderData.find((f: any) => f.name === name)?.value || "";
 
-      await pool.execute(
-        "INSERT INTO orders (id, channelName, channelLink, projectType, description, referenceLinks, attachedFiles, budget, deadline, email, discord, submittedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          Date.now().toString(36),
-          getValue("Channel Name"), getValue("Channel Link"),
-          getValue("Project Type"), getValue("Description"),
-          getValue("Reference Links"), JSON.stringify([]),
-          parseFloat(getValue("Budget").replace("$", "")) || 0,
-          getValue("Deadline"), getValue("Email"), getValue("Discord"),
-          new Date().toISOString()
-        ]
-      );
+      const newOrder = {
+        id: Date.now().toString(36),
+        channelName: getValue("Channel Name"),
+        channelLink: getValue("Channel Link"),
+        projectType: getValue("Project Type"),
+        description: getValue("Description"),
+        referenceLinks: getValue("Reference Links"),
+        attachedFiles: [],
+        budget: parseFloat(getValue("Budget").replace("$", "")) || 0,
+        deadline: getValue("Deadline"),
+        email: getValue("Email"),
+        discord: getValue("Discord"),
+        submittedAt: new Date().toISOString()
+      };
+
+      const data = fs.readFileSync(ORDERS_FILE, "utf-8");
+      const orders = JSON.parse(data);
+      orders.unshift(newOrder);
+      fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf-8");
     } catch (e) {
-      console.error("DB save error:", e);
+      console.error("File save error:", e);
     }
 
     return NextResponse.json({ success: true });

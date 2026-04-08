@@ -525,7 +525,7 @@ export default function OrderPage() {
                     </motion.button>
 
                     <p className="text-center text-xs text-[#555] mt-2">
-                      We&apos;ll respond within 24 hours · 2 free revisions included · $25-$500+ range
+                      We'll respond within 24 hours
                     </p>
                   </div>
                 </motion.form>

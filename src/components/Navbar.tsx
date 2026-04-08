@@ -8,7 +8,6 @@ import { usePathname } from "next/navigation";
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Portfolio", href: "/portfolio" },
   { name: "Shop", href: "/shop" },
   { name: "Order", href: "/order" },
   { name: "About", href: "/about" },
@@ -134,13 +133,13 @@ export default function Navbar() {
           {/* Email */}
           <div className="relative flex items-center justify-center">
             <a
-              href="mailto:minebuster125@gmail.com"
+              href="mailto:contact@mineproductions.net"
               onClick={() => {
-                navigator.clipboard.writeText("minebuster125@gmail.com");
+                navigator.clipboard.writeText("contact@mineproductions.net");
                 setCopiedEmail(true);
                 setTimeout(() => setCopiedEmail(false), 2000);
               }}
-              title="minebuster125@gmail.com"
+              title="contact@mineproductions.net"
               className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#888] hover:text-[#4CAF50] hover:border-[rgba(76,175,80,0.3)] hover:bg-[rgba(76,175,80,0.08)] transition-all duration-300"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -242,9 +241,9 @@ export default function Navbar() {
               </a>
               <div className="relative">
                 <a
-                  href="mailto:minebuster125@gmail.com"
+                  href="mailto:contact@mineproductions.net"
                   onClick={() => {
-                    navigator.clipboard.writeText("minebuster125@gmail.com");
+                    navigator.clipboard.writeText("contact@mineproductions.net");
                     setCopiedEmail(true);
                     setTimeout(() => setCopiedEmail(false), 2000);
                   }}

@@ -15,7 +15,7 @@ export default function Footer() {
   };
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText("minebuster125@gmail.com");
+    navigator.clipboard.writeText("contact@mineproductions.net");
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };
@@ -56,7 +56,7 @@ export default function Footer() {
               Navigation
             </h4>
             <div className="flex flex-col gap-3">
-              {["Home", "Portfolio", "Shop", "Order", "About"].map((name) => (
+              {["Home", "Shop", "Order", "About"].map((name) => (
                 <Link
                   key={name}
                   href={name === "Home" ? "/" : `/${name.toLowerCase()}`}
@@ -115,7 +115,7 @@ export default function Footer() {
 
               {/* Email — Click to Copy & Open */}
               <a
-                href="mailto:minebuster125@gmail.com"
+                href="mailto:contact@mineproductions.net"
                 onClick={handleCopyEmail}
                 className="group relative flex items-center gap-2 text-left text-sm text-[#888] hover:text-[#4CAF50] transition-all duration-300 cursor-pointer w-fit mt-2"
               >
@@ -123,7 +123,7 @@ export default function Footer() {
                   <rect x="2" y="4" width="20" height="16" rx="2" />
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                 </svg>
-                <span>minebuster125@gmail.com</span>
+                <span>contact@mineproductions.net</span>
 
                 {/* Copy icon */}
                 <svg
@@ -187,7 +187,7 @@ export default function Footer() {
 
               {/* Email */}
               <a
-                href="mailto:minebuster125@gmail.com"
+                href="mailto:contact@mineproductions.net"
                 onClick={handleCopyEmail}
                 aria-label="Email"
                 className="w-10 h-10 rounded-lg bg-[#1a1a1a] flex items-center justify-center text-[#888] hover:text-[#4CAF50] hover:bg-[#222] transition-all duration-300 relative group"

@@ -12,6 +12,7 @@ interface ShopItem {
   price: number;
   type: string;
   youtubeLink: string;
+  buyAction?: string;
   thumbnailUrl?: string;
   imageData?: string;
   createdAt: string;
@@ -36,14 +37,37 @@ function getYouTubeThumbnail(url: string): string | null {
 export default function ShopPage() {
   const [active, setActive] = useState("All");
   const [products, setProducts] = useState<ShopItem[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleBuyClick = (product: ShopItem) => {
+    if (!product.buyAction) return;
+
+    if (product.buyAction.startsWith("http://") || product.buyAction.startsWith("https://")) {
+      window.open(product.buyAction, "_blank");
+    } else {
+      navigator.clipboard.writeText(product.buyAction);
+      setCopiedId(product.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("mp_shop_items");
-      if (stored) setProducts(JSON.parse(stored));
-    } catch {
-      // localStorage unavailable
-    }
+    // Fetch shop items from database via API
+    const fetchShopItems = async () => {
+      try {
+        const response = await fetch("/api/shop");
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error("Failed to fetch shop items");
+        }
+      } catch (error) {
+        console.error("Error fetching shop items:", error);
+      }
+    };
+    
+    fetchShopItems();
   }, []);
 
   const filtered =
@@ -224,8 +248,12 @@ export default function ShopPage() {
 
                           {/* Actions */}
                           <div className="flex gap-3">
-                            <button className="btn-primary flex-1 py-3 text-xs" id={`buy-${product.id}`}>
-                              Buy Now
+                            <button 
+                              className="btn-primary flex-1 py-3 text-xs" 
+                              id={`buy-${product.id}`}
+                              onClick={() => handleBuyClick(product)}
+                            >
+                              {copiedId === product.id ? "Copied!" : "Buy Now"}
                             </button>
                             {product.youtubeLink && (
                               <a

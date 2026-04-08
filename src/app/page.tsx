@@ -68,24 +68,31 @@ const steps = [
   },
 ];
 
+function getYouTubeThumbnail(url: string | undefined): string | null {
+  if (!url) return null;
+  const regExp = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
+}
+
 const featuredProjects = [
   {
-    title: "Castle Siege Recreation",
-    type: "Recreation",
-    thumbnail: "🏰",
-    description: "Epic castle siege battle recreation with 200+ participants",
+    title: "100+ Custom Models Pack",
+    type: "Models",
+    thumbnail: "🛒",
+    description: "Premium Minecraft models ready for your server.",
   },
   {
-    title: "Skyblock Challenge Map",
-    type: "Custom Map",
-    thumbnail: "🌊",
-    description: "Multi-level skyblock challenge with custom mechanics",
+    title: "Skyblock Spawn",
+    type: "Maps",
+    thumbnail: "🛒",
+    description: "Highly detailed skyblock spawn.",
   },
   {
-    title: "100 Days Animation",
-    type: "Animation",
-    thumbnail: "⚔️",
-    description: "Cinematic 100 days hardcore survival story",
+    title: "Animated HUD",
+    type: "Plugins",
+    thumbnail: "🛒",
+    description: "Custom animated UI for players.",
   },
 ];
 
@@ -103,18 +110,21 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("mp_portfolio_items");
+      const stored = localStorage.getItem("mp_shop_items");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && parsed.length > 0) {
-          const mapped = parsed.slice(0, 3).map((item: any) => ({
-            title: item.title,
-            type: item.type,
-            thumbnail: item.imageData ? "" : "🎬",
-            image: item.imageData,
-            youtubeLink: item.youtubeLink,
-            description: "",
-          }));
+          const mapped = parsed.slice(0, 3).map((item: any) => {
+            const thumb = item.imageData || getYouTubeThumbnail(item.youtubeLink);
+            return {
+              title: item.title,
+              type: item.type,
+              thumbnail: thumb ? "" : "🛒",
+              image: thumb,
+              youtubeLink: item.youtubeLink,
+              description: item.description,
+            };
+          });
           setDynamicProjects(mapped);
         }
       }
@@ -203,9 +213,9 @@ export default function HomePage() {
                 Order Custom Project
               </button>
             </Link>
-            <Link href="/portfolio">
+            <Link href="/shop">
               <button className="btn-secondary text-base" id="hero-portfolio-btn">
-                View Portfolio
+                Shop
               </button>
             </Link>
           </motion.div>
@@ -350,14 +360,14 @@ export default function HomePage() {
                 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#4CAF50] mb-4 block"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Portfolio
+                Shop
               </span>
               <h2
                 className="text-4xl md:text-5xl font-bold"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 Featured{" "}
-                <span className="gradient-text">Projects</span>
+                <span className="gradient-text">Items</span>
               </h2>
             </div>
           </ScrollReveal>
@@ -420,9 +430,9 @@ export default function HomePage() {
 
           <ScrollReveal>
             <div className="text-center mt-12">
-              <Link href="/portfolio">
+              <Link href="/shop">
                 <button className="btn-secondary" id="view-all-projects-btn">
-                  View All Projects →
+                  View Shop →
                 </button>
               </Link>
             </div>

@@ -109,26 +109,33 @@ export default function HomePage() {
   const [dynamicProjects, setDynamicProjects] = useState(featuredProjects);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("mp_shop_items");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.length > 0) {
-          const mapped = parsed.slice(0, 3).map((item: any) => {
-            const thumb = item.imageData || getYouTubeThumbnail(item.youtubeLink);
-            return {
-              title: item.title,
-              type: item.type,
-              thumbnail: thumb ? "" : "🛒",
-              image: thumb,
-              youtubeLink: item.youtubeLink,
-              description: item.description,
-            };
-          });
-          setDynamicProjects(mapped);
+    // Fetch shop items from API instead of localStorage
+    const fetchShopItems = async () => {
+      try {
+        const response = await fetch("/api/shop");
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            const mapped = data.slice(0, 3).map((item: any) => {
+              const thumb = item.imageData || getYouTubeThumbnail(item.youtubeLink);
+              return {
+                title: item.title,
+                type: item.type,
+                thumbnail: thumb ? "" : "🛒",
+                image: thumb,
+                youtubeLink: item.youtubeLink,
+                description: item.description,
+              };
+            });
+            setDynamicProjects(mapped);
+          }
         }
+      } catch (error) {
+        console.error("Failed to fetch shop items:", error);
       }
-    } catch {}
+    };
+    
+    fetchShopItems();
   }, []);
 
   return (

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Quick Fix - MineProductions</title>
+    <style>
+        body {
+            background: #080808;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .box {
+            background: #111;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .error { border-color: #f44336; }
+        .success { border-color: #4CAF50; }
+        .warning { border-color: #ff9800; }
+        button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        button:hover { background: #45a049; }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .red { background: #f44336; }
+        .green { background: #4CAF50; color: #000; }
+        .orange { background: #ff9800; color: #000; }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #4CAF50;
+        }
+        .step {
+            background: #1a1a1a;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        h1 { color: #4CAF50; }
+        h2 { color: #FFD700; }
+        code {
+            background: #000;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 MineProductions - Quick Diagnostic & Fix</h1>
+    <p><strong>Yeh page automatically check karega ki kya issue hai aur kaise fix karna hai!</strong></p>
+
+    <!-- Auto Diagnostic -->
+    <div class="box" id="diagnosticBox">
+        <h2>🔍 Step 1: Auto Diagnostic Running...</h2>
+        <div id="diagnosticResult">
+            <p>⏳ Checking...</p>
+        </div>
+    </div>
+
+    <!-- Manual Fix Steps -->
+    <div class="box" id="fixSteps" style="display:none;">
+        <h2>🛠️ Fix Steps (Follow Exactly!)</h2>
+        <div id="fixContent"></div>
+    </div>
+
+    <!-- Test After Fix -->
+    <div class="box">
+        <h2>✅ Step 2: Test After Fix</h2>
+        <button onclick="testAgain()">🔄 Re-Test Everything</button>
+        <button onclick="addTestItem()">➕ Add Test Item</button>
+        <div id="testResult"></div>
+    </div>
+
+    <script>
+        let issues = [];
+
+        // Auto-run diagnostic on page load
+        window.onload = async function() {
+            await runDiagnostic();
+        };
+
+        async function runDiagnostic() {
+            const resultDiv = document.getElementById('diagnosticResult');
+            const fixSteps = document.getElementById('fixSteps');
+            const fixContent = document.getElementById('fixContent');
+            issues = [];
+
+            resultDiv.innerHTML = '<p>⏳ Running diagnostic tests...</p>';
+
+            let html = '<h3>Diagnostic Results:</h3>';
+
+            // Test 1: Check if API route exists
+            html += '<div class="step"><strong>Test 1: API Route Check</strong><br>';
+            try {
+                const response = await fetch('/api/shop');
+                if (response.ok) {
+                    const data = await response.json();
+                    html += '<span class="status green">✅ API Route Working!</span><br>';
+                    html += `Items in database: ${data.length}<br>`;
+                    if (data.length === 0) {
+                        html += '<span class="status orange">⚠️ No items found - Admin se add karo</span>';
+                    }
+                } else {
+                    html += '<span class="status red">❌ API Route Failed!</span><br>';
+                    issues.push('api_failed');
+                }
+            } catch (error) {
+                html += '<span class="status red">❌ Cannot connect to API!</span><br>';
+                html += `Error: ${error.message}<br>`;
+                issues.push('api_not_found');
+            }
+            html += '</div>';
+
+            // Test 2: Check if data can be written
+            html += '<div class="step"><strong>Test 2: Data Write Check</strong><br>';
+            html += '<span class="status orange">⚠️ Cannot test write permissions from browser</span><br>';
+            html += 'Need to check manually via cPanel<br>';
+            issues.push('check_permissions');
+            html += '</div>';
+
+            // Test 3: Check shop page
+            html += '<div class="step"><strong>Test 3: Shop Page Check</strong><br>';
+            html += '<a href="/shop" target="_blank" style="color: #4CAF50;">➡️ Open Shop Page</a><br>';
+            html += 'Check if items show up there<br>';
+            html += '</div>';
+
+            resultDiv.innerHTML = html;
+
+            // Show fix steps if issues found
+            if (issues.length > 0) {
+                fixSteps.style.display = 'block';
+                fixContent.innerHTML = generateFixSteps();
+            } else {
+                fixContent.innerHTML = '<div class="status green">✅ Everything looks good!</div>';
+            }
+        }
+
+        function generateFixSteps() {
+            let html = '';
+
+            if (issues.includes('api_not_found') || issues.includes('api_failed')) {
+                html += `
+                    <div class="step">
+                        <h3>🔴 Issue: API Not Working</h3>
+                        <p><strong>Cause:</strong> API route file missing ya data folder nahi hai</p>
+                        <p><strong>Fix:</strong></p>
+                        <ol>
+                            <li><strong>cPanel → File Manager</strong> open karo</li>
+                            <li><strong>public_html</strong> folder mein jao</li>
+                            <li><strong>New Folder</strong> create karo: <code>data</code></li>
+                            <li><code>data</code> folder pe right click → <strong>Permissions</strong> → <code>777</code> set karo</li>
+                            <li><code>data</code> folder mein <strong>New File</strong>: <code>shop-items.json</code></li>
+                            <li>File edit karo aur sirf yeh likho: <code>[]</code></li>
+                            <li>Save karo</li>
+                            <li>Same way <code>orders.json</code> file banao with <code>[]</code></li>
+                            <li>Dono files ka permission <code>666</code> set karo</li>
+                            <li><strong>cPanel → Setup Node.js App → Restart</strong></li>
+                        </ol>
+                        <p><strong>Commands (agar SSH access hai):</strong></p>
+                        <pre>cd ~/public_html
+mkdir -p data
+chmod 777 data
+echo "[]" > data/shop-items.json
+echo "[]" > data/orders.json
+chmod 666 data/*.json</pre>
+                    </div>
+                `;
+            }
+
+            if (issues.includes('check_permissions')) {
+                html += `
+                    <div class="step">
+                        <h3>⚠️ Check: File Permissions</h3>
+                        <p><strong>Verify karo:</strong></p>
+                        <ul>
+                            <li><code>/public_html/data</code> folder: <strong>777</strong></li>
+                            <li><code>/public_html/data/shop-items.json</code>: <strong>666</strong></li>
+                            <li><code>/public_html/data/orders.json</code>: <strong>666</strong></li>
+                        </ul>
+                        <p>File Manager mein right click → Change Permissions</p>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="step">
+                    <h3>🔄 Final Step: Restart Everything</h3>
+                    <ol>
+                        <li>cPanel → <strong>Setup Node.js App</strong></li>
+                        <li><strong>Restart</strong> button click karo</li>
+                        <li>Wait 10 seconds</li>
+                        <li>Yaha wapas aao aur <strong>Re-Test</strong> button click karo</li>
+                    </ol>
+                </div>
+            `;
+
+            return html;
+        }
+
+        async function testAgain() {
+            document.getElementById('testResult').innerHTML = '<p>⏳ Testing...</p>';
+            await runDiagnostic();
+            
+            const response = await fetch('/api/shop');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('testResult').innerHTML = `
+                    <div class="status green">✅ Test Successful!</div>
+                    <p>Shop items: ${data.length}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p><strong>Next:</strong> Admin panel se item add karo!</p>
+                `;
+            } else {
+                document.getElementById('testResult').innerHTML = `
+                    <div class="status red">❌ Still not working!</div>
+                    <p>Double check all fix steps above</p>
+                `;
+            }
+        }
+
+        async function addTestItem() {
+            const password = prompt('Admin Password enter karo:', 'Mine@buster@2012');
+            if (!password) return;
+
+            document.getElementById('testResult').innerHTML = '<p>⏳ Adding test item...</p>';
+
+            try {
+                const response = await fetch('/api/admin/data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-password': password
+                    },
+                    body: JSON.stringify({
+                        action: 'add_shop_item',
+                        item: {
+                            id: 'test_' + Date.now(),
+                            title: 'Test Item - Working!',
+                            description: 'Agar yeh dikh raha hai matlab sab theek hai!',
+                            price: 99,
+                            type: 'Minecraft But Mods & Plugins',
+                            youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                            buyAction: 'Discord: Test#1234',
+                            imageData: '',
+                            createdAt: new Date().toISOString()
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('testResult').innerHTML = `
+                        <div class="status green">✅ Test Item Added!</div>
+                        <p>Now check:</p>
+                        <ul>
+                            <li><a href="/shop" target="_blank" style="color: #4CAF50;">Open Shop Page</a></li>
+                            <li><a href="/mp-admin-x7k2" target="_blank" style="color: #4CAF50;">Open Admin Panel</a></li>
+                        </ul>
+                        <p>Dusre device/browser se bhi check karo - dikhna chahiye!</p>
+                    `;
+                } else {
+                    const error = await response.json();
+                    document.getElementById('testResult').innerHTML = `
+                        <div class="status red">❌ Failed to add item!</div>
+                        <p>Error: ${error.error || 'Unknown'}</p>
+                        <p>Data folder permissions check karo!</p>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('testResult').innerHTML = `
+                    <div class="status red">❌ Error!</div>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
